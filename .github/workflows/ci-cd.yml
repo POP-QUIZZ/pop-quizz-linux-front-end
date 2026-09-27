@@ -105,7 +105,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, linux, x64, deploy-infra]
+    runs-on: [self-hosted, Linux, X64, deploy-infra]
     # needs: docker
 
     steps:
