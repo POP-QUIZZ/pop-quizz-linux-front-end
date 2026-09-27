@@ -106,7 +106,9 @@ env:
 jobs:
   deploy:
     runs-on: [self-hosted, Linux, X64, deploy-infra]
-    # needs: docker
+    container:
+      image: node:22-bookworm
+      options: --network=host
 
     steps:
       - name: Checkout repository
@@ -118,8 +120,8 @@ jobs:
 
       - name: Install Ansible
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+           apt-get update
+           apt-get install -y \
             ansible-core \
             openssh-client \
             git
