@@ -1,6 +1,6 @@
 # Pop-Quizz Linux — Frontend
 
-Application de quiz en temps réel sur le thème Linux (commandes, shell, culture générale), avec gestion multi-joueurs, classement live et statistiques administrateur.
+Application de quizz en temps réel sur le thème Linux (commandes, shell, culture générale), avec gestion multi-joueurs, classement live et statistiques administrateur.
 
 ## Stack technique
 
