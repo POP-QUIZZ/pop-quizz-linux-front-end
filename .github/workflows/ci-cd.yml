@@ -82,3 +82,73 @@ jobs:
             VITE_API_HOSTNAME=192.168.56.2
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: [self-hosted, linux, x64, deploy-infra]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clone infra repository
+        run: |
+          git clone https://x-access-token:${{ github.token }}@github.com/POP-QUIZZ/pop-quizz-linux-infra.git
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ansible-core \
+            openssh-client \
+            git
+
+      - name: Install Ansible collections
+        run: |
+          ansible-galaxy collection install \
+            community.docker \
+            ansible.posix
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "${{ secrets.SSH_PRIVATE_KEY_B64 }}" \
+            | base64 -d > ~/.ssh/n8n_deploy_ci
+
+          chmod 600 ~/.ssh/n8n_deploy_ci
+
+          ssh-keygen -y \
+            -f ~/.ssh/n8n_deploy_ci > /dev/null
+
+      - name: Prepare Vault password
+        run: |
+          printf '%s' \
+            "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" \
+            > /tmp/vault_pass.txt
+
+          chmod 600 /tmp/vault_pass.txt
+
+      - name: Test SSH connection
+        run: |
+          ssh \
+            -i ~/.ssh/n8n_deploy_ci \
+            -o StrictHostKeyChecking=no \
+            deploy@192.168.56.2 \
+            "sudo -n id"
+
+      - name: Deploy with Ansible
+        run: |
+          cd pop-quizz-linux-infra/ansible
+
+          ansible-playbook \
+            -i inventory/hosts.ini \
+            playbooks/deploy.yml \
+            --private-key ~/.ssh/n8n_deploy_ci \
+            --vault-password-file /tmp/vault_pass.txt
+
+      - name: Cleanup secrets
+        if: always()
+        run: |
+          rm -f /tmp/vault_pass.txt
+          rm -f ~/.ssh/n8n_deploy_ci
