@@ -145,7 +145,7 @@ jobs:
 
       - name: Deploy with Ansible
         run: |
-          cd pop-quizz-linux-infra/ansible
+          ls && cd pop-quizz-linux-infra/ansible && pwd
 
           ansible-playbook \
             -i inventory/hosts.ini \
