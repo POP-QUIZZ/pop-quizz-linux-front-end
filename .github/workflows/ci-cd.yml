@@ -117,20 +117,6 @@ jobs:
         run: |
           git clone https://x-access-token:${{ github.token }}@github.com/POP-QUIZZ/pop-quizz-linux-infra.git
 
-      - name: Install Ansible
-        run: |
-           apt-get update
-           apt-get install -y \
-            ansible-core \
-            openssh-client \
-            git
-
-      - name: Install Ansible collections
-        run: |
-          ansible-galaxy collection install \
-            community.docker \
-            ansible.posix
-
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
