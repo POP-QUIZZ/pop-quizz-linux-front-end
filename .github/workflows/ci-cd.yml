@@ -83,7 +83,7 @@
 #             VITE_API_HOSTNAME=192.168.56.2
 #           cache-from: type=gha
 #           cache-to: type=gha,mode=max
-# ---
+# --
 name: Frontend CI/CD
 
 on:
