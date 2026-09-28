@@ -51,7 +51,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  docker:
+  publish:
     name: Build & Push Docker image
     needs: quality
     runs-on: ubuntu-latest
@@ -71,71 +71,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Compute short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
             ${{ env.IMAGE_NAME }}:latest
           build-args: |
             VITE_API_HOSTNAME=192.168.56.2
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  deploy:
-    needs: docker
-    runs-on: [self-hosted, Linux, X64, deploy-infra]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Clone infra repository
-        run: |
-          git clone https://x-access-token:${{ github.token }}@github.com/POP-QUIZZ/pop-quizz-linux-infra.git
-
-      - name: Configure SSH
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
-          echo "${{ secrets.SSH_PRIVATE_KEY_B64 }}" \
-            | base64 -d > ~/.ssh/n8n_deploy_ci
-
-          chmod 600 ~/.ssh/n8n_deploy_ci
-
-          ssh-keygen -y \
-            -f ~/.ssh/n8n_deploy_ci > /dev/null
-
-      - name: Prepare Vault password
-        run: |
-          printf '%s' \
-            "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" \
-            > /tmp/vault_pass.txt
-
-          chmod 600 /tmp/vault_pass.txt
-
-      - name: Test SSH connection
-        run: |
-          ssh \
-            -i ~/.ssh/n8n_deploy_ci \
-            -o StrictHostKeyChecking=no \
-            deploy@192.168.56.2 \
-            "sudo -n id"
-
-      - name: Deploy with Ansible
-        run: |
-          ls && cd pop-quizz-linux-infra/ansible && pwd
-
-          ansible-playbook \
-            -i inventory/hosts.ini \
-            playbooks/deploy.yml \
-            --private-key ~/.ssh/n8n_deploy_ci \
-            --vault-password-file /tmp/vault_pass.txt
-
-      - name: Cleanup secrets
-        if: always()
-        run: |
-          rm -f /tmp/vault_pass.txt
-          rm -f ~/.ssh/n8n_deploy_ci
