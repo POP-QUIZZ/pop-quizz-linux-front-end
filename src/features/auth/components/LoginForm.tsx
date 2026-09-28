@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import FormInput from "@/components/common/FormInput.tsx";
-import { emailSchema, passwordSchema, validateField } from "@/lib/input.validator.ts";
+import {
+  emailSchema,
+  passwordSchema,
+  validateField,
+} from "@/lib/input.validator.ts";
 import { Lock, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -46,50 +50,58 @@ export default function LoginForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    if (Object.values(v).some(r => !r.success)) return;
+    if (Object.values(v).some((r) => !r.success)) return;
     authenticate({ email, password });
   };
 
   return (
-      <FormContainer title={"Connexion"} >
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-sm">
-          <FormInput
-              label="Email"
-              icon={Mail}
-              type="email"
-              value={email}
-              onChange={setEmail}
-              placeholder="Votre email..."
-              isError={submitted && !v.email.success}
-              errorMessage={v.email.error}
-          />
-          <FormInput
-              label="Mot de passe"
-              icon={Lock}
-              type="password"
-              value={password}
-              onChange={setPassword}
-              placeholder="* * * * * *"
-              isError={submitted && !v.password.success}
-              errorMessage={v.password.error}
-          />
-          <span className="text-sm">Pas encore de compte ? <Link to={"/register"} className="font-bold underline text-primary" >Cliquez ici</Link></span>
-          <button type="submit" className="btn-primary">
-            Se connecter
-          </button>
-        </form>
-        <ValidationDialog
-            xCloseButton={false}
-            open={showDialog}
-            isPending={isPending}
-            isSuccess={isSuccess}
-            error={(error as any)?.message}
-            loadingMessage="Connexion en cours..."
-            successMessage="Connexion réussie !"
-            autoClose={true}
-            autoCloseDelay={2000}
-            onClose={() => setShowDialog(false)}
+    <FormContainer title={"Se connecter"}>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 w-full max-w-sm"
+      >
+        <FormInput
+          label="Email"
+          icon={Mail}
+          type="email"
+          value={email}
+          onChange={setEmail}
+          placeholder="Votre email..."
+          isError={submitted && !v.email.success}
+          errorMessage={v.email.error}
         />
-      </FormContainer>
+        <FormInput
+          label="Mot de passe"
+          icon={Lock}
+          type="password"
+          value={password}
+          onChange={setPassword}
+          placeholder="* * * * * *"
+          isError={submitted && !v.password.success}
+          errorMessage={v.password.error}
+        />
+        <span className="text-sm">
+          Pas encore de compte ?{" "}
+          <Link to={"/register"} className="font-bold underline text-primary">
+            Cliquez ici
+          </Link>
+        </span>
+        <button type="submit" className="btn-primary">
+          Se connecter
+        </button>
+      </form>
+      <ValidationDialog
+        xCloseButton={false}
+        open={showDialog}
+        isPending={isPending}
+        isSuccess={isSuccess}
+        error={(error as any)?.message}
+        loadingMessage="Connexion en cours..."
+        successMessage="Connexion réussie !"
+        autoClose={true}
+        autoCloseDelay={2000}
+        onClose={() => setShowDialog(false)}
+      />
+    </FormContainer>
   );
 }
