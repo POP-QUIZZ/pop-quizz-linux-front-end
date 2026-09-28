@@ -85,6 +85,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
+    needs: docker
     runs-on: [self-hosted, Linux, X64, deploy-infra]
     steps:
       - name: Checkout repository
